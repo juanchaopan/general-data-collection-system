@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 async function fetchStatus(): Promise<'ok' | 'down'> {
   try {
-    const res = await fetch('/api/health/ready');
+    const res = await fetch('/api/v1/health');
     return res.ok ? 'ok' : 'down';
   } catch {
     return 'down';

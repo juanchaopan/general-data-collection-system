@@ -14,3 +14,11 @@ describe('健康检查', () => {
     expect(() => loadConfig({ PORT: 'abc' })).toThrow();
   });
 });
+
+describe('代理可达的探测接口', () => {
+  it('/api/v1/health 返回 ok', async () => {
+    const app = buildApp(loadConfig({ LOG_LEVEL: 'fatal' }));
+    const res = await app.inject({ method: 'GET', url: '/api/v1/health' });
+    expect(res.statusCode).toBe(200);
+  });
+});

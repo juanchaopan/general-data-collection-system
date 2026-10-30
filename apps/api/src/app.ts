@@ -5,6 +5,8 @@ import type { Config } from './shared/config.js';
 export function buildApp(config: Config): FastifyInstance {
   const app = Fastify({ logger: { level: config.LOG_LEVEL }, requestIdHeader: 'x-request-id' });
 
+  // 经反向代理（/api）可达的探测接口，Web 界面用它显示接口状态。
+  app.get('/api/v1/health', () => ({ status: 'ok' }));
   app.get('/health/live', () => ({ status: 'ok' }));
   app.get('/health/ready', () => ({ status: 'ok', role: config.ROLE }));
 
