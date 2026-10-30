@@ -1,0 +1,42 @@
+{
+  "script": "k5-during",
+  "at": "2026-10-30T17:54:35.831Z",
+  "failed": 0,
+  "results": [
+    {
+      "id": "K5 Keycloak DOWN: API still accepts an already-issued access token (keys cached)",
+      "pass": true,
+      "status": 200,
+      "ms": 36
+    },
+    {
+      "id": "K5 Keycloak DOWN: token signed by an unknown key is refused cleanly (401, fast)",
+      "pass": true,
+      "status": 401,
+      "ms": 9
+    },
+    {
+      "id": "K5 Keycloak DOWN: login page request through the proxy",
+      "info": true,
+      "status": 502,
+      "ms": 6
+    },
+    {
+      "id": "K5 Keycloak DOWN: login fails fast and gracefully (no hang)",
+      "pass": true,
+      "status": 502
+    },
+    {
+      "id": "K5 Keycloak DOWN: refresh attempt",
+      "info": true,
+      "status": 502,
+      "ms": 5
+    },
+    {
+      "id": "K5 Keycloak DOWN: admin call fails fast so the app can mark the user \"pending\" and retry",
+      "pass": true,
+      "error": "ECONNREFUSED",
+      "ms": 3
+    }
+  ]
+}

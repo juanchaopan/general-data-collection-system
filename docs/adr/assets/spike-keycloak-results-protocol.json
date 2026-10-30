@@ -1,0 +1,175 @@
+{
+  "script": "run-protocol",
+  "at": "2026-10-30T17:42:21.529Z",
+  "failed": 0,
+  "results": [
+    {
+      "id": "K1 login page -> redirect to add-in callback with code",
+      "pass": true,
+      "stateEchoed": true,
+      "loginMs": 3176
+    },
+    {
+      "id": "K1 wrong PKCE verifier is rejected",
+      "pass": true,
+      "status": 400
+    },
+    {
+      "id": "K1 code is burned after a failed attempt (cannot be used again)",
+      "pass": true,
+      "status": 400
+    },
+    {
+      "id": "K1 correct code + verifier gives tokens",
+      "pass": true,
+      "status": 200,
+      "expires_in": 15,
+      "refresh_expires_in": 1800
+    },
+    {
+      "id": "K1 access token issuer is the single external origin (/auth/ on :3443)",
+      "pass": true,
+      "iss": "https://localhost:3443/auth/realms/gdcs"
+    },
+    {
+      "id": "K1 access token lifetime is short (15 s)",
+      "pass": true,
+      "lifetimeSeconds": 15
+    },
+    {
+      "id": "K1 token claim names (values omitted)",
+      "info": true,
+      "claims": [
+        "exp",
+        "iat",
+        "auth_time",
+        "jti",
+        "iss",
+        "sub",
+        "typ",
+        "azp",
+        "sid",
+        "acr",
+        "allowed-origins",
+        "scope",
+        "email_verified",
+        "name",
+        "preferred_username",
+        "given_name",
+        "family_name",
+        "email"
+      ],
+      "azp": "addin",
+      "hasRealmRoles": false,
+      "hasEmail": true
+    },
+    {
+      "id": "K1 API accepts the Keycloak access token",
+      "pass": true
+    },
+    {
+      "id": "K1 API rejects a token with a tampered payload",
+      "pass": true
+    },
+    {
+      "id": "K2 expired access token is rejected by the API",
+      "pass": true
+    },
+    {
+      "id": "K2 refresh without password works",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "id": "K2 refresh token is rotated (new value each use)",
+      "pass": true
+    },
+    {
+      "id": "K2 the old refresh token is dead after rotation",
+      "pass": true,
+      "status": 400
+    },
+    {
+      "id": "K2 new access token works on the API",
+      "pass": true
+    },
+    {
+      "id": "K2 behaviour after replaying a used refresh token (is the newest one also revoked?)",
+      "info": true,
+      "newestStillWorks": false,
+      "status": 400
+    },
+    {
+      "id": "K1 redirect_uri outside the allow-list is refused (error page, no redirect)",
+      "pass": true,
+      "leaked": false,
+      "pageSays": "GDCS We are sorry... English French (Français) Invalid parameter: redirect_uri"
+    },
+    {
+      "id": "K1 plain method is not accepted for the add-in client",
+      "pass": true,
+      "error": "invalid_request",
+      "pageSays": ""
+    },
+    {
+      "id": "K1 no PKCE at all is not accepted for the add-in client",
+      "pass": true,
+      "error": "invalid_request",
+      "pageSays": ""
+    },
+    {
+      "id": "K3 login page text (en)",
+      "info": true,
+      "htmlLang": "en",
+      "title": "Sign in to your account",
+      "labels": [
+        "Username or email",
+        "Password"
+      ],
+      "button": "Sign In",
+      "forgot": "Forgot Password?"
+    },
+    {
+      "id": "K3 axe (en): no critical/serious violations on the login page",
+      "pass": true,
+      "violations": [],
+      "incomplete": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "passes": 21
+    },
+    {
+      "id": "K3 login page text (fr)",
+      "info": true,
+      "htmlLang": "fr",
+      "title": "Connectez-vous à votre compte",
+      "labels": [
+        "Nom d'utilisateur ou courriel",
+        "Mot de passe"
+      ],
+      "button": "Connexion",
+      "forgot": "Mot de passe oublié ?"
+    },
+    {
+      "id": "K3 axe (fr): no critical/serious violations on the login page",
+      "pass": true,
+      "violations": [],
+      "incomplete": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "passes": 21
+    },
+    {
+      "id": "K3 French page is actually French (lang attr and text)",
+      "pass": true,
+      "htmlLang": "fr"
+    },
+    {
+      "id": "K3 axe (fr): no critical/serious violations on the forgot-password page",
+      "pass": true,
+      "violations": []
+    }
+  ]
+}

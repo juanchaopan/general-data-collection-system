@@ -1,0 +1,64 @@
+{
+  "script": "run-lockout",
+  "at": "2026-10-30T17:41:39.769Z",
+  "failed": 0,
+  "results": [
+    {
+      "id": "created test user",
+      "info": true,
+      "status": 201
+    },
+    {
+      "id": "failure timeline (wrong passwords, 1.3 s apart)",
+      "info": true,
+      "timeline": [
+        {
+          "attempt": 1,
+          "numFailures": 1,
+          "disabled": false
+        },
+        {
+          "attempt": 2,
+          "numFailures": 2,
+          "disabled": false
+        },
+        {
+          "attempt": 3,
+          "numFailures": 3,
+          "disabled": false
+        },
+        {
+          "attempt": 4,
+          "numFailures": 4,
+          "disabled": false
+        },
+        {
+          "attempt": 5,
+          "numFailures": 5,
+          "disabled": true
+        },
+        {
+          "attempt": 6,
+          "numFailures": 5,
+          "disabled": true
+        }
+      ]
+    },
+    {
+      "id": "K3 account locks at the configured threshold (5 wrong passwords)",
+      "pass": true,
+      "firstLockedAtAttempt": 5
+    },
+    {
+      "id": "K3 while locked, the correct password is also refused",
+      "pass": true,
+      "redirected": false
+    },
+    {
+      "id": "K3 message shown while locked (does it reveal the lock?)",
+      "info": true,
+      "revealsLock": false,
+      "text": "GDCS Sign in to your account English French (Français) Username or email Invalid username or password. Password Forgot Password? S"
+    }
+  ]
+}

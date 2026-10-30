@@ -1,0 +1,69 @@
+{
+  "script": "k4-admin",
+  "at": "2026-10-30T17:43:26.006Z",
+  "failed": 0,
+  "results": [
+    {
+      "id": "K4 create user + \"set password\" e-mail is sent",
+      "pass": true,
+      "mails": [
+        {
+          "to": [
+            "<k4-mvv9ghmk-a@example.invalid>"
+          ],
+          "subject": "Update Your Account",
+          "lang": ""
+        }
+      ]
+    },
+    {
+      "id": "K4 e-mail follows the user locale attribute (fr)",
+      "pass": true,
+      "enSubject": "Update Your Account",
+      "frSubject": "=?UTF-8?Q?Mettre_=C3=A0_jour_votre_compte?=",
+      "lang": ""
+    },
+    {
+      "id": "K4 retry of an already-created user is idempotent (no duplicate, same id)",
+      "pass": true,
+      "how": "already-existed"
+    },
+    {
+      "id": "K4 concurrent provisioning of the same e-mail leaves exactly one user",
+      "pass": true,
+      "outcomes": [
+        "created",
+        "already-existed"
+      ]
+    },
+    {
+      "id": "K4 a second account with the same e-mail is refused (409)",
+      "pass": true,
+      "status": 409
+    },
+    {
+      "id": "K4 Keycloak unreachable -> clean failure; later retry succeeds without leftovers",
+      "pass": true,
+      "firstAttempt": "ECONNREFUSED",
+      "retry": "created"
+    },
+    {
+      "id": "K4 bulk creation throughput (200 users, concurrency 5, no e-mail)",
+      "info": true,
+      "users": 200,
+      "failures": 0,
+      "seconds": 0.5,
+      "usersPerSecond": 429.2,
+      "estimateFor10000Minutes": 0.4
+    },
+    {
+      "id": "K4 bulk creation of 200 users completes without failures",
+      "pass": true
+    },
+    {
+      "id": "cleanup",
+      "info": true,
+      "deletedUsers": 204
+    }
+  ]
+}

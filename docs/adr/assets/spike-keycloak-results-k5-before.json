@@ -1,0 +1,17 @@
+{
+  "script": "k5-before",
+  "at": "2026-10-30T17:54:20.556Z",
+  "failed": 0,
+  "results": [
+    {
+      "id": "K5 Keycloak up: API accepts the token",
+      "pass": true,
+      "tokenLifetimeSeconds": 300
+    },
+    {
+      "id": "realm access token lifespan restored",
+      "info": true,
+      "seconds": 15
+    }
+  ]
+}
