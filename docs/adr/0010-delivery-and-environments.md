@@ -29,6 +29,7 @@
 
 - **代码托管：GitHub 私有仓库**（用户选择）。
 - **环境：本地 + CI 自动检查**（用户选择）。不建任何线上环境，不配部署流水线；上线平台定了（Q-002）再配。
+- **本地容器环境：Rancher Desktop**（Apache-2.0，WSL2，dockerd 引擎，不启用 Kubernetes），由用户在本机安装（Q-028）；不用 Docker Desktop，因为大型组织需要付费订阅，与"偏好免费"冲突。本机安装前，用 Keycloak 解压版、本机 PostgreSQL 和 Node 原生运行作为备选（ADR-0006 的探针已证明 Keycloak 可以这样跑）。
 - **本地**：`infra/docker-compose.yml` 一条命令启动 Caddy、两个 API 实例、一个 worker、PostgreSQL、Keycloak、Mailpit，带种子实例和演示数据。本地 HTTPS 用 mkcert（MIT）生成受信任的证书（Office 加载项要求 HTTPS）。
 - **CI（GitHub Actions）**：格式、lint、架构检查、类型检查、单元与组件测试、构建、Storybook 构建与无障碍检查、Playwright 端到端 + axe + 视觉回归（用同一份编排起整套系统）、密钥扫描（含历史）、重复代码检查。
 - **分支策略**：由 /setup-ai-review 时确定（建议 GitHub Flow，单人维护）。
