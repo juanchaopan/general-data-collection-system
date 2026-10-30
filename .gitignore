@@ -1,0 +1,33 @@
+# 仓库根目录的通用忽略规则。各组件目录里还有生成器生成的 .gitignore。
+
+# 操作系统和编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# 本地配置和密钥
+.env
+.env.*
+!.env.example
+*.local
+
+# Claude Code 的个人设置
+.claude/settings.local.json
+
+# 日志
+*.log
+
+# 构建产物与依赖
+node_modules/
+dist/
+coverage/
+storybook-static/
+playwright-report/
+test-results/
+.pnpm-store/
+
+# 本地 HTTPS 证书
+infra/caddy/certs/

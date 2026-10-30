@@ -1,0 +1,32 @@
+{
+  "threshold": 2,
+  "minTokens": 60,
+  "minLines": 8,
+  "reporters": ["console"],
+  "gitignore": true,
+  "absolute": false,
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/target/**",
+    "**/bin/**",
+    "**/obj/**",
+    "**/.venv/**",
+    "**/coverage/**",
+    "**/*.min.js",
+    "**/*.lock",
+    "**/package-lock.json",
+    "**/pnpm-lock.yaml",
+    "**/storybook-static/**",
+    "**/*.stories.tsx",
+    "**/*.md",
+    "**/*.json",
+    "**/*.yml",
+    "**/*.yaml",
+    "**/*.svg",
+    "**/scripts/arch-check.mjs",
+    "**/.dependency-cruiser.cjs",
+    "**/eslint.config.mjs"
+  ]
+}

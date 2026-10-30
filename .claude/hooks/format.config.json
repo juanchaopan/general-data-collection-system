@@ -1,0 +1,10 @@
+{
+  "rules": [
+    { "dir": "apps/api", "extensions": [".ts"], "format": "npx prettier --write {file}", "lint": "npx eslint {file}" },
+    { "dir": "libs/schemas", "extensions": [".ts"], "format": "npx prettier --write {file}", "lint": "npx eslint {file}" },
+    { "dir": "libs/formula", "extensions": [".ts"], "format": "npx prettier --write {file}", "lint": "npx eslint {file}" },
+    { "dir": "libs/i18n", "extensions": [".ts"], "format": "npx prettier --write {file}", "lint": "npx eslint {file}" },
+    { "dir": "apps/web", "extensions": [".ts", ".tsx", ".css"], "format": "npx prettier --write {file}", "lint": "npx oxlint {file}" },
+    { "dir": "apps/addin", "extensions": [".ts", ".tsx", ".css"], "format": "npx prettier --write {file}", "lint": "npx oxlint {file}" }
+  ]
+}

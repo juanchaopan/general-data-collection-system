@@ -1,0 +1,27 @@
+{
+  "script": "k5-after",
+  "at": "2026-10-30T17:55:04.438Z",
+  "failed": 0,
+  "results": [
+    {
+      "id": "K5 after restart: realm settings survived (token 15 s, refresh rotation on)",
+      "pass": true,
+      "accessTokenLifespan": 15,
+      "revokeRefreshToken": true
+    },
+    {
+      "id": "K5 after restart: does the refresh token issued BEFORE the restart still work? (session persistence)",
+      "info": true,
+      "status": 200,
+      "works": true
+    },
+    {
+      "id": "K5 after restart: a fresh login works and the user still exists",
+      "pass": true
+    },
+    {
+      "id": "K5 after restart: the provisioning retry succeeds with no leftovers",
+      "pass": true
+    }
+  ]
+}

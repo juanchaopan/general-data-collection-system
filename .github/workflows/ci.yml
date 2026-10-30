@@ -1,0 +1,118 @@
+name: ci
+
+# 必需的自动检查：每个组件的格式、lint、架构检查、类型检查、测试、构建；Storybook 构建；
+# Playwright 的无障碍（axe）与视觉回归；compose 配置检查；密钥扫描（含历史）；整个仓库的重复代码检查。
+# 分支规则按 job 名 "ci" 把汇总 job 设为合并前必须通过：它在所有其他 job 结束后运行，任何一个失败它就失败。
+# 这里的命令和 CLAUDE.md「自检命令」保持一致，本地能过的，CI 上也应该能过。
+
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches: [main, master, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  duplication:
+    name: duplication
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+      - run: npx --yes jscpd@5 .
+
+  secrets:
+    name: secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  compose:
+    name: compose
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: cp infra/.env.example infra/.env
+      - run: docker compose -f infra/docker-compose.yml config --quiet
+
+  # ---- 项目专属：每个组件一个 job（矩阵），按 stack.md 的 CI 步骤，包管理器是 pnpm ----
+  # web、addin、api 引用 libs 的构建产物，所以先构建被依赖的包（"<目录>^..." 表示它依赖的所有包）。
+  check:
+    name: check (${{ matrix.dir }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dir: [libs/schemas, libs/formula, libs/i18n, apps/api, apps/web, apps/addin]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter "./${{ matrix.dir }}^..." run build
+      - if: matrix.dir == 'apps/web'
+        run: pnpm exec playwright install --with-deps chromium
+        working-directory: apps/web
+      - run: pnpm run format:check
+        working-directory: ${{ matrix.dir }}
+      - run: pnpm run lint
+        working-directory: ${{ matrix.dir }}
+      - run: pnpm run arch
+        working-directory: ${{ matrix.dir }}
+      - run: pnpm run typecheck
+        working-directory: ${{ matrix.dir }}
+      - run: pnpm test
+        working-directory: ${{ matrix.dir }}
+      - run: pnpm run build
+        working-directory: ${{ matrix.dir }}
+      - if: matrix.dir == 'apps/web'
+        run: pnpm run build-storybook
+        working-directory: apps/web
+
+  web-visual:
+    name: web-visual
+    runs-on: ubuntu-latest
+    # 版本号要和 apps/web 里 @playwright/test 的版本一致；基准截图在这个镜像里生成（apps/web/scripts/update-snapshots.sh）
+    container: mcr.microsoft.com/playwright:v1.64.1-noble
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v5
+      - run: npm install -g pnpm@"$(node -p "require('../../package.json').packageManager.split('@')[1]")"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter "./apps/web^..." run build
+        working-directory: .
+      - run: pnpm exec playwright test
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diff
+          path: apps/web/test-results/
+  # ---- 项目专属：结束 ----
+
+  ci:
+    name: ci
+    if: always()
+    needs: [duplication, secrets, compose, check, web-visual]
+    runs-on: ubuntu-latest
+    steps:
+      - if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
+      - run: echo "全部检查通过"

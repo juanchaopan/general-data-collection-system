@@ -1,0 +1,63 @@
+{
+ "browser": "149.0.7827.114",
+ "ag": {
+  "ready_ms": 184,
+  "to_interactive_ms": 384,
+  "edit_p50": 1.1,
+  "edit_p95": 3.1,
+  "edit_max": 115.4,
+  "keyboard": {
+   "focusAfterArrows": "c0",
+   "cell0AfterEdit": 777,
+   "totalBefore": 2455850,
+   "totalAfter": 2456527,
+   "totalChanged": true,
+   "editWorked": true
+  },
+  "axe": {
+   "violations": [],
+   "passes": 18,
+   "incomplete": [
+    "color-contrast"
+   ]
+  },
+  "errs": []
+ },
+ "hot": {
+  "ready_ms": 498,
+  "to_interactive_ms": 617,
+  "edit_p50": 24.8,
+  "edit_p95": 33.4,
+  "edit_max": 49,
+  "keyboard": {
+   "focusAfterArrows": "[0,0,0,0]",
+   "cell0AfterEdit": "777",
+   "totalBefore": 2455850,
+   "totalAfter": 2456527,
+   "totalChanged": true,
+   "editWorked": true
+  },
+  "axe": {
+   "violations": [
+    {
+     "id": "aria-required-children",
+     "impact": "critical",
+     "nodes": 1,
+     "help": "Certain ARIA roles must contain particular children"
+    },
+    {
+     "id": "label",
+     "impact": "critical",
+     "nodes": 1,
+     "help": "Form elements must have labels"
+    }
+   ],
+   "passes": 17,
+   "incomplete": [
+    "aria-required-children",
+    "scrollable-region-focusable"
+   ]
+  },
+  "errs": []
+ }
+}

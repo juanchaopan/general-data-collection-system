@@ -1,0 +1,58 @@
+# PR 风险规则。每行一个路径模式，从仓库根目录算起。
+#   **  匹配任意层目录，例如 **/auth/** 匹配任何位置的 auth 目录
+#   *   匹配同一层目录里的任意字符，例如 docs/*.md
+# 判定方法：有任何改动文件命中 [high] → 高风险；所有改动文件都命中 [low] → 低风险；其他情况 → 中风险。
+# 两类 PR 不看路径：release/* 分支合入 → 高风险（合并就是发布，要你确认）；
+# 从 main 或 master 回合并 → 低风险（内容已经在 main 上审查过）。
+# 低风险 PR 通过 CI 和 AI 审查后即可合并；中、高风险 PR 要你亲自看过改动并加上 human-reviewed 标签。
+# 高风险 PR 的 AI 审查会更深入。
+# 判定时用的是目标分支上的这份规则，PR 改这个文件不会改变它自己的风险等级。
+
+[high]
+# 流程和规范本身：放宽检查规则、改基线、改 CI，都要人看过
+.github/**
+.githooks/**
+.claude/**
+CLAUDE.md
+REVIEW.md
+AGENTS.md
+.jscpd.json
+**/.dependency-cruiser.cjs
+**/.dependency-cruiser-known-violations.json
+**/ArchitectureTest.java
+**/ArchitectureTests.cs
+**/archunit.properties
+**/archunit_store/**
+**/.importlinter
+**/checkstyle.xml
+**/pmd-ruleset.xml
+**/eslint.config.*
+**/.oxlintrc.json
+**/ruff.toml
+**/mypy.ini
+**/.editorconfig
+**/Directory.Build.props
+# 视觉回归的基准截图：外观变了，要人对照新旧截图确认
+**/*-snapshots/**
+pnpm-workspace.yaml
+apps/web/playwright.config.ts
+# 业务上敏感的代码
+**/auth/**
+**/billing/**
+**/payment/**
+**/payments/**
+**/migrations/**
+**/*.sql
+**/.env*
+**/install*
+**/release/**
+**/Dockerfile
+infra/**
+apps/api/src/iam/**
+apps/api/src/audit/**
+
+[low]
+**/*.md
+docs/**
+**/*.txt
+LICENSE
