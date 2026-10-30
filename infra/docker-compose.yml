@@ -1,0 +1,154 @@
+# 本地运行环境（ADR-0010）：docker compose -f infra/docker-compose.yml up --build
+# 先把 infra/.env.example 复制为 infra/.env。入口：https://localhost
+name: gdcs
+
+x-api-env: &api-env
+  DATABASE_URL: postgres://${POSTGRES_USER:-gdcs}:${POSTGRES_PASSWORD:?先把 infra/.env.example 复制为 infra/.env}@postgres:5432/${POSTGRES_DB:-gdcs}
+  OIDC_ISSUER: https://${GDCS_HOST:-localhost}/auth/realms/gdcs
+  OIDC_JWKS_URL: http://keycloak:8080/auth/realms/gdcs/protocol/openid-connect/certs
+  SMTP_HOST: mailpit
+  SMTP_PORT: "1025"
+  LOG_LEVEL: info
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gdcs}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?先把 infra/.env.example 复制为 infra/.env}
+      POSTGRES_DB: ${POSTGRES_DB:-gdcs}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:latest
+    # 邮件捕获：网页界面 http://localhost:8025（只绑定本机）
+    ports:
+      - "127.0.0.1:8025:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: ${POSTGRES_USER:-gdcs}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:?先把 infra/.env.example 复制为 infra/.env}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?先把 infra/.env.example 复制为 infra/.env}
+      KC_HOSTNAME: https://${GDCS_HOST:-localhost}/auth
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HEALTH_ENABLED: "true"
+    volumes:
+      - ./keycloak/realm-gdcs.json:/opt/keycloak/data/import/realm-gdcs.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # 镜像里没有 curl：用 bash 的 /dev/tcp 请求管理端口的就绪接口
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /auth/health/ready HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    environment:
+      <<: *api-env
+      ROLE: api
+    deploy:
+      replicas: 2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  worker:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    environment:
+      <<: *api-env
+      ROLE: worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  addin:
+    build:
+      context: ..
+      dockerfile: apps/addin/Dockerfile
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "443:443"
+    environment:
+      GDCS_HOST: ${GDCS_HOST:-localhost}
+      CADDY_TLS: ${CADDY_TLS:-internal}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/certs:/certs:ro
+      - caddy_data:/data
+    depends_on:
+      api:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+      addin:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  pgdata:
+  caddy_data:

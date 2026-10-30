@@ -1,0 +1,32 @@
+# 单一域名：/api → API 实例（轮询），/auth → Keycloak，/addin → 加载项静态文件，其余 → Web。
+# 本地默认用 Caddy 自带的内部证书；Office 加载项要求受信任的证书，用 mkcert 生成后在 .env 里设置 CADDY_TLS（见 .env.example）。
+{$GDCS_HOST:localhost} {
+	tls {$CADDY_TLS:internal}
+	encode zstd gzip
+	request_header X-Request-Id {http.request.uuid}
+
+	handle /api/* {
+		reverse_proxy {
+			dynamic a {
+				name api
+				port 3000
+				refresh 5s
+			}
+			lb_policy round_robin
+			health_uri /health/ready
+			health_interval 5s
+		}
+	}
+
+	handle /auth/* {
+		reverse_proxy keycloak:8080
+	}
+
+	handle_path /addin/* {
+		reverse_proxy addin:8080
+	}
+
+	handle {
+		reverse_proxy web:8080
+	}
+}

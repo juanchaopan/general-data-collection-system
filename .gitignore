@@ -28,3 +28,6 @@ storybook-static/
 playwright-report/
 test-results/
 .pnpm-store/
+
+# 本地 HTTPS 证书
+infra/caddy/certs/
