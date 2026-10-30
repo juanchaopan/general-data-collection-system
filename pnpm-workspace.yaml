@@ -1,0 +1,7 @@
+packages:
+  - apps/*
+  - libs/*
+
+# pnpm 默认不运行依赖的安装脚本；这里只放行确实需要的包。
+onlyBuiltDependencies:
+  - esbuild
